@@ -2,7 +2,7 @@
 
 import os
 import re
-from train_classifier import load_data
+from data_utils import load_data
 import argparse
 import zeno_client
 import pandas as pd
