@@ -125,7 +125,9 @@ def visualize_aider_bench(input_files: list[str]):
     # Do evaluation
     for input_file, data_entry in zip(input_files, data):
         output = [''] * len(data[0])
+        resolved = [0] * len(data[0])
         for entry in data_entry:
+            resolved[id_map[entry[0]]] = entry[2]
             output[id_map[entry[0]]] += f'## Resolved\n {entry[2]} \n ## Test Cases\n {entry[3]}\n ## Agent Trajectory\n'
             for i in range(len(entry[4])):
                 output[id_map[entry[0]]] += f'### Step {i+1} \n'
@@ -138,6 +140,7 @@ def visualize_aider_bench(input_files: list[str]):
             {
                 "id": ids,
                 "agent output": output,
+                "resolved": resolved
             },
             index=ids,
         )
