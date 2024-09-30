@@ -128,13 +128,16 @@ def visualize_aider_bench(input_files: list[str]):
         resolved = [0] * len(data[0])
         for entry in data_entry:
             resolved[id_map[entry[0]]] = entry[2]
-            output[id_map[entry[0]]] += f'## Resolved\n {entry[2]} \n ## Test Cases\n {entry[3]}\n ## Agent Trajectory\n'
-            for i in range(len(entry[4])):
+            output[id_map[entry[0]]] += f'## Resolved\n {entry[2]} \n ## Test Cases\n {entry[3]}\n'
+            output[id_map[entry[0]]] += f'## Tests\n {entry[4]}\n ## Agent Trajectory\n'
+            for i in range(len(entry[5])):
                 output[id_map[entry[0]]] += f'### Step {i+1} \n'
-                output[id_map[entry[0]]] += f'Action: {entry[4][i]["action"]}\n'
-                output[id_map[entry[0]]] += f'Code: {entry[4][i]["code"]}\n'
-                output[id_map[entry[0]]] += f'Thought: {entry[4][i]["thought"]}\n'
-                output[id_map[entry[0]]] += f'Observation: {entry[4][i]["observation"]}\n'
+                output[id_map[entry[0]]] += f'Action: {entry[5][i]["action"]}\n'
+                output[id_map[entry[0]]] += f'Code: {entry[5][i]["code"]}\n'
+                output[id_map[entry[0]]] += f'Thought: {entry[5][i]["thought"]}\n'
+                output[id_map[entry[0]]] += f'Observation: {entry[5][i]["observation"]}\n'
+
+
 
         df_system = pd.DataFrame(
             {
