@@ -31,12 +31,13 @@ def load_data_aider_bench(file_path):
             resolved = 1 if test_result.get("exit_code")==0 and bool(re.fullmatch(r'\.+', test_result.get("test_cases"))) else 0
             test_cases = test_result.get("test_cases")
             instruction = data.get("instruction")
+            tests = data.get("instance",{}).get("test")
             agent_trajectory = []
             for step in data.get("history", []):
                 if step[0]["source"] != "agent":
                     continue
                 agent_trajectory.append({"action": step[0].get("action"), "code":step[0].get("args",{}).get("code"),"thought":step[0].get("args",{}).get("thought"),"observation":step[1].get("message")})
-            data_list.append((instance_id, instruction, resolved, test_cases, agent_trajectory))
+            data_list.append((instance_id, instruction, resolved, test_cases, tests, agent_trajectory))
 
     return data_list
 
