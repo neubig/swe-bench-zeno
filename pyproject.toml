@@ -5,7 +5,7 @@ package-mode = false
 python = "^3.12"
 zeno-client = "^0.1.16"
 swe-bench = {git = "https://github.com/csmith49/swe-bench.git"}
-
+click = "^8.1.7"
 
 [build-system]
 requires = ["poetry-core"]
