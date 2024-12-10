@@ -30,18 +30,18 @@ def visualise_swe_bench(input_files: list[str]):
     df_data = pd.DataFrame(
         {
             "id": ids,
-            "problem_statement": [x[1] for x in data[0]],
+            "problem_statement": [{"text": "", "sections": [{"title": "Problem", "content": x[1]}]} for x in data[0]],
         },
         index=ids,
     )
-    df_data["statement_length"] = df_data["problem_statement"].apply(len)
+    df_data["statement_length"] = df_data["problem_statement"].apply(lambda x: len(x["sections"][0]["content"]))
     df_data["repo"] = df_data["id"].str.rsplit("-", n=1).str[0]
     vis_project = vis_client.create_project(
         name="OD swe-bench visualization",
         view={
             "data": {"type": "message", "content": {"type": "markdown"}, "role": "user"},
             "label": {"type": "text"},
-            "output": {"type": "message", "content": {"type": "text"}, "role": "assistant"},
+            "output": {"type": "message", "content": {"type": "markdown"}, "role": "assistant"},
         },
         description="OD issue prediction",
         public=False,
@@ -97,11 +97,11 @@ def visualize_aider_bench(input_files: list[str]):
     df_data = pd.DataFrame(
         {
             "id": ids,
-            "instruction": [x[1] for x in data[0]],
+            "instruction": [{"text": x[1]} for x in data[0]],
         },
         index=ids,
     )
-    df_data["instruction_length"] = df_data["instruction"].apply(len)
+    df_data["instruction_length"] = df_data["instruction"].apply(lambda x: len(x["text"]))
     #df_data["repo"] = df_data["id"].str.rsplit("-", n=1).str[0]
     vis_project = vis_client.create_project(
         name="Aider Bench Code Editing Visualization",
@@ -124,19 +124,26 @@ def visualize_aider_bench(input_files: list[str]):
 
     # Do evaluation
     for input_file, data_entry in zip(input_files, data):
-        output = [''] * len(data[0])
+        output = []
         resolved = [0] * len(data[0])
         for entry in data_entry:
             resolved[id_map[entry[0]]] = entry[2]
-            output[id_map[entry[0]]] += f'## Resolved\n {entry[2]} \n ## Test Cases\n {entry[3]}\n'
-            output[id_map[entry[0]]] += f'## Tests\n {entry[4]}\n ## Agent Trajectory\n'
-            for i in range(len(entry[5])):
-                output[id_map[entry[0]]] += f'### Step {i+1} \n'
-                output[id_map[entry[0]]] += f'Action: {entry[5][i]["action"]}\n'
-                output[id_map[entry[0]]] += f'Code: {entry[5][i]["code"]}\n'
-                output[id_map[entry[0]]] += f'Thought: {entry[5][i]["thought"]}\n'
-                output[id_map[entry[0]]] += f'Observation: {entry[5][i]["observation"]}\n'
-
+            trajectory = {
+                "text": "",
+                "sections": [
+                    {"title": "Resolved", "content": str(entry[2])},
+                    {"title": "Test Cases", "content": str(entry[3])},
+                    {"title": "Tests", "content": str(entry[4])},
+                    {"title": "Agent Trajectory", "content": ""}
+                ]
+            }
+            for i, step in enumerate(entry[5]):
+                trajectory["sections"][3]["content"] += f'### Step {i+1}\n'
+                trajectory["sections"][3]["content"] += f'Action: {step["action"]}\n'
+                trajectory["sections"][3]["content"] += f'Code: {step["code"]}\n'
+                trajectory["sections"][3]["content"] += f'Thought: {step["thought"]}\n'
+                trajectory["sections"][3]["content"] += f'Observation: {step["observation"]}\n'
+            output.append(trajectory)
 
 
         df_system = pd.DataFrame(

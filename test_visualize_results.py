@@ -41,12 +41,21 @@ def test_visualise_swe_bench():
             assert args["view"]["data"]["content"]["type"] == "markdown"
             assert args["view"]["data"]["role"] == "user"
             assert args["view"]["output"]["type"] == "message"
-            assert args["view"]["output"]["content"]["type"] == "text"
+            assert args["view"]["output"]["content"]["type"] == "markdown"
             assert args["view"]["output"]["role"] == "assistant"
             
             # Verify that upload_dataset and upload_system were called
             mock_project.upload_dataset.assert_called_once()
             mock_project.upload_system.assert_called_once()
+            
+            # Verify that the dataset has the correct format
+            df_data = mock_project.upload_dataset.call_args[0][0]
+            assert isinstance(df_data["problem_statement"].iloc[0], dict)
+            assert "text" in df_data["problem_statement"].iloc[0]
+            assert "sections" in df_data["problem_statement"].iloc[0]
+            assert len(df_data["problem_statement"].iloc[0]["sections"]) == 1
+            assert df_data["problem_statement"].iloc[0]["sections"][0]["title"] == "Problem"
+            assert df_data["problem_statement"].iloc[0]["sections"][0]["content"] == "Fix this bug"
         
     finally:
         os.unlink(temp_file)
@@ -128,16 +137,22 @@ def test_visualize_aider_bench():
             df = mock_project.upload_system.call_args[0][0]
             print("DataFrame:", df)
             
-            # Verify that the DataFrame contains the expected markdown format
-            assert "## Resolved" in df["agent output"].iloc[0]
-            assert "## Test Cases" in df["agent output"].iloc[0]
-            assert "## Tests" in df["agent output"].iloc[0]
-            assert "## Agent Trajectory" in df["agent output"].iloc[0]
-            assert "### Step 1" in df["agent output"].iloc[0]
-            assert "Action: action1" in df["agent output"].iloc[0]
-            assert "Code: code1" in df["agent output"].iloc[0]
-            assert "Thought: thought1" in df["agent output"].iloc[0]
-            assert "Observation: obs1" in df["agent output"].iloc[0]
+            # Verify that the DataFrame contains the expected JSON format
+            output = df["agent output"].iloc[0]
+            assert output["text"] == ""
+            assert len(output["sections"]) == 4
+            assert output["sections"][0]["title"] == "Resolved"
+            assert output["sections"][0]["content"] == "True"
+            assert output["sections"][1]["title"] == "Test Cases"
+            assert output["sections"][1]["content"] == "test case 1"
+            assert output["sections"][2]["title"] == "Tests"
+            assert output["sections"][2]["content"] == "test 1"
+            assert output["sections"][3]["title"] == "Agent Trajectory"
+            assert "### Step 1" in output["sections"][3]["content"]
+            assert "Action: action1" in output["sections"][3]["content"]
+            assert "Code: code1" in output["sections"][3]["content"]
+            assert "Thought: thought1" in output["sections"][3]["content"]
+            assert "Observation: obs1" in output["sections"][3]["content"]
         
     finally:
         os.unlink(temp_file)
