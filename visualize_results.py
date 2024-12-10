@@ -39,9 +39,9 @@ def visualise_swe_bench(input_files: list[str]):
     vis_project = vis_client.create_project(
         name="OD swe-bench visualization",
         view={
-            "data": {"type": "markdown"},
+            "data": {"type": "message", "content": {"type": "markdown"}, "role": "user"},
             "label": {"type": "text"},
-            "output": {"type": "text"},
+            "output": {"type": "message", "content": {"type": "text"}, "role": "assistant"},
         },
         description="OD issue prediction",
         public=False,
@@ -106,9 +106,9 @@ def visualize_aider_bench(input_files: list[str]):
     vis_project = vis_client.create_project(
         name="Aider Bench Code Editing Visualization",
         view={
-            "data": {"type": "markdown"},
+            "data": {"type": "message", "content": {"type": "markdown"}, "role": "user"},
             "label": {"type": "text"},
-            "output": {"type": "markdown"}
+            "output": {"type": "message", "content": {"type": "markdown"}, "role": "assistant"}
         },
         description="Aider Bench Code Editing",
         public=False,
