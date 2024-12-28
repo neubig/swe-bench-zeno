@@ -1,2 +1,6 @@
 .requirements.txt.swp
 __pycache__/
+**/__pycache__
+.venv
+.mypy_cache
+poetry.lock
