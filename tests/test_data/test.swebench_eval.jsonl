@@ -1,0 +1,2 @@
+{"instance_id": "test-instance-1", "test_result": {"report": {"resolved": true}}}
+{"instance_id": "test-instance-2", "test_result": {"report": {"resolved": false}}}
