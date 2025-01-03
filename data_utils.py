@@ -94,6 +94,7 @@ def load_data_aider_bench(file_path):
             )
             test_cases = test_result.get('test_cases')
             instruction = data.get('instruction')
+            tests = data.get('instance', {}).get('test')
             agent_trajectory = []
             for step in data.get('history', []):
                 if step[0]['source'] != 'agent':
@@ -106,9 +107,7 @@ def load_data_aider_bench(file_path):
                         'observation': step[1].get('message'),
                     }
                 )
-            data_list.append(
-                (instance_id, instruction, resolved, test_cases, agent_trajectory)
-            )
+            data_list.append((instance_id, instruction, resolved, test_cases, tests, agent_trajectory))
 
     return data_list
 

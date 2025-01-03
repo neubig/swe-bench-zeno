@@ -1,0 +1,2 @@
+{"instance_id": "test-instance-1", "instance": {"problem_statement": "Fix the bug in test_file.py"}, "history": [{"source": "user", "message": "Can you help me fix this bug?"}, {"source": "agent", "message": "I'll help you fix the bug."}]}
+{"instance_id": "test-instance-2", "instance": {"problem_statement": "Add a new feature"}, "history": [{"source": "user", "message": "Please add this feature"}, {"source": "agent", "message": "I'll add the feature."}]}
