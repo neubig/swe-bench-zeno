@@ -29,7 +29,9 @@ def visualise_swe_bench(input_files: list[str]):
             duplicates.add(x)
         seen.add(x)
 
-    API_KEY = os.environ["Zeno_Key"]
+    API_KEY = os.environ.get("Zeno_Key") or os.environ.get("ZENO_API_KEY")
+    if not API_KEY:
+        raise ValueError("No Zeno API key found in environment variables")
     vis_client = zeno_client.ZenoClient(API_KEY)
 
     # Create DataFrame with properly formatted conversations
@@ -68,7 +70,7 @@ def visualise_swe_bench(input_files: list[str]):
 
     # Upload dataset
     vis_project.upload_dataset(
-        df_data,
+        df_data=df_data,
         id_column='id',
         data_column='data',
     )
@@ -118,7 +120,7 @@ def visualise_swe_bench(input_files: list[str]):
                 model_name = f"System_{input_files.index(input_file)}"
             
             vis_project.upload_system(
-                df_system, 
+                df_system=df_system, 
                 name=model_name, 
                 id_column='id', 
                 output_column='output',
@@ -148,8 +150,10 @@ def visualize_aider_bench(input_files: list[str]):
     print(duplicates)
 
     vis_client, vis_project = None, None
-    print(os.environ.get("ZENO_API_KEY"))
-    vis_client = zeno_client.ZenoClient(os.environ.get("ZENO_API_KEY"))
+    API_KEY = os.environ.get("Zeno_Key") or os.environ.get("ZENO_API_KEY")
+    if not API_KEY:
+        raise ValueError("No Zeno API key found in environment variables")
+    vis_client = zeno_client.ZenoClient(API_KEY)
 
     # use zeno to visualize
     df_data = pd.DataFrame(
@@ -175,7 +179,7 @@ def visualize_aider_bench(input_files: list[str]):
         ],
     )
     vis_project.upload_dataset(
-        df_data,
+        df_data=df_data,
         id_column="id",
         data_column="instruction"
     )
@@ -207,7 +211,10 @@ def visualize_aider_bench(input_files: list[str]):
         )
 
         vis_project.upload_system(
-            df_system, name=get_model_name_aider_bench(input_file), id_column="id", output_column="agent output"
+            df_system=df_system,
+            name=get_model_name_aider_bench(input_file),
+            id_column="id",
+            output_column="agent output"
         )
 
 

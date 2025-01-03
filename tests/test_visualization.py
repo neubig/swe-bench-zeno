@@ -45,6 +45,7 @@ class TestVisualization(unittest.TestCase):
         self.assertEqual(data[1][2], 0)
         self.assertEqual(len(data[1][3]), 2)
 
+    @patch.dict('os.environ', {'Zeno_Key': 'test_key'})
     @patch('zeno_client.ZenoClient')
     def test_visualise_swe_bench(self, mock_zeno_client):
         # Create mock objects
@@ -57,7 +58,7 @@ class TestVisualization(unittest.TestCase):
         visualise_swe_bench([self.test_file])
 
         # Verify ZenoClient was initialized
-        mock_zeno_client.assert_called_once()
+        mock_zeno_client.assert_called_once_with('test_key')
 
         # Verify project was created with correct parameters
         mock_client.create_project.assert_called_once()
@@ -68,14 +69,14 @@ class TestVisualization(unittest.TestCase):
         # Verify dataset was uploaded
         mock_project.upload_dataset.assert_called_once()
         df_args = mock_project.upload_dataset.call_args[1]
-        self.assertIsInstance(df_args['df'], pd.DataFrame)
+        self.assertIsInstance(df_args['df_data'], pd.DataFrame)
         self.assertEqual(df_args['id_column'], 'id')
         self.assertEqual(df_args['data_column'], 'data')
 
         # Verify system was uploaded
         mock_project.upload_system.assert_called_once()
         system_args = mock_project.upload_system.call_args[1]
-        self.assertIsInstance(system_args['df'], pd.DataFrame)
+        self.assertIsInstance(system_args['df_system'], pd.DataFrame)
         self.assertEqual(system_args['id_column'], 'id')
         self.assertEqual(system_args['output_column'], 'output')
 
@@ -103,6 +104,7 @@ class TestVisualization(unittest.TestCase):
         model_name = get_model_name_aider_bench(self.test_aider_file)
         self.assertEqual(model_name, "gpt-4")
 
+    @patch.dict('os.environ', {'ZENO_API_KEY': 'test_key'})
     @patch('zeno_client.ZenoClient')
     def test_visualize_aider_bench(self, mock_zeno_client):
         # Create mock objects
@@ -115,7 +117,7 @@ class TestVisualization(unittest.TestCase):
         visualize_aider_bench([self.test_aider_file])
 
         # Verify ZenoClient was initialized
-        mock_zeno_client.assert_called_once()
+        mock_zeno_client.assert_called_once_with('test_key')
 
         # Verify project was created with correct parameters
         mock_client.create_project.assert_called_once()
@@ -126,14 +128,14 @@ class TestVisualization(unittest.TestCase):
         # Verify dataset was uploaded
         mock_project.upload_dataset.assert_called_once()
         df_args = mock_project.upload_dataset.call_args[1]
-        self.assertIsInstance(df_args['df'], pd.DataFrame)
+        self.assertIsInstance(df_args['df_data'], pd.DataFrame)
         self.assertEqual(df_args['id_column'], 'id')
         self.assertEqual(df_args['data_column'], 'instruction')
 
         # Verify system was uploaded
         mock_project.upload_system.assert_called_once()
         system_args = mock_project.upload_system.call_args[1]
-        self.assertIsInstance(system_args['df'], pd.DataFrame)
+        self.assertIsInstance(system_args['df_system'], pd.DataFrame)
         self.assertEqual(system_args['id_column'], 'id')
         self.assertEqual(system_args['output_column'], 'agent output')
 
