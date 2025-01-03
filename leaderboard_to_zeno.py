@@ -35,13 +35,7 @@ def main(split: Split, zeno_api_key: str | None, top_n: int | None) -> None:
         view={
             "data": {"type": "markdown"},
             "label": {"type": "text"},
-            "output": {
-                "type": "vstack",
-                "keys": {
-                    "status": {"type": "text", "label": "Status"},
-                    "patch": {"type": "code"},
-                }
-            },
+            "output": {"type": "code"},
         },
         description=f"SWE-bench leaderboard (as of {current_time}) performance analysis, by entry.",
         public=True,
@@ -92,12 +86,10 @@ def main(split: Split, zeno_api_key: str | None, top_n: int | None) -> None:
                 {
                     "instance_id": prediction.instance_id,
                     "resolved": system.results.is_resolved(prediction.instance_id),
-                    "output": {
-                        "status": "✅ Success" if system.results.is_resolved(prediction.instance_id)
-                                else "❌ Failed" if prediction.patch
-                                else "Not attempted",
-                        "patch": prediction.patch or "No patch generated",
-                    }
+                    "output": (
+                        f"Status: {'✅ Success' if system.results.is_resolved(prediction.instance_id) else '❌ Failed' if prediction.patch else 'Not attempted'}\n\n"
+                        f"{prediction.patch or 'No patch generated'}"
+                    )
                 }
                 for prediction in system.predictions
             ]
