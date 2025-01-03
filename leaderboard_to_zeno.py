@@ -34,7 +34,13 @@ def main(split: Split, zeno_api_key: str | None) -> None:
         view={
             "data": {"type": "markdown"},
             "label": {"type": "text"},
-            "output": {"type": "code"},
+            "output": {
+                "type": "vstack",
+                "keys": {
+                    "status": {"type": "text", "label": "Status"},
+                    "patch": {"type": "code"},
+                }
+            },
         },
         description=f"SWE-bench leaderboard (as of {current_time}) performance analysis, by entry.",
         public=True,
@@ -65,8 +71,14 @@ def main(split: Split, zeno_api_key: str | None) -> None:
         data = pd.DataFrame(
             [
                 {
-                    **prediction.model_dump(),
+                    "instance_id": prediction.instance_id,
                     "resolved": system.results.is_resolved(prediction.instance_id),
+                    "output": {
+                        "status": "✅ Success" if system.results.is_resolved(prediction.instance_id)
+                                else "❌ Failed" if prediction.model_patch
+                                else "Not attempted",
+                        "patch": prediction.model_patch or "No patch generated",
+                    }
                 }
                 for prediction in system.predictions
             ]
@@ -81,7 +93,7 @@ def main(split: Split, zeno_api_key: str | None) -> None:
             data,
             name=entry,
             id_column="instance_id",
-            output_column="patch",
+            output_column="output",
         )
 
 
