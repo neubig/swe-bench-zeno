@@ -13,7 +13,7 @@ ds = load_dataset('princeton-nlp/SWE-bench_Verified')
 df_data = pd.DataFrame({
     'id': ds['test']['instance_id'],
     'problem_statement': ds['test']['problem_statement'],
-    'data': ds['test']['problem_statement'],  # Use problem statement as data
+    'data': ds['test']['problem_statement'],
 })
 
 # Create the Zeno project
@@ -27,7 +27,13 @@ viz_project = viz_client.create_project(
     view={
         'data': {'type': 'markdown'},
         'label': {'type': 'text'},
-        'output': {'type': 'code'},
+        'output': {
+            'type': 'vstack',
+            'keys': {
+                'status': {'type': 'text', 'label': 'Status'},
+                'patch': {'type': 'code'},
+            }
+        },
     },
     description='SWE-bench Verified leaderboard performance analysis',
     public=True,
@@ -64,15 +70,33 @@ for system_name, system_dir in systems:
     # Load resolved status
     results_file = f"/workspace/experiments/evaluation/verified/{system_dir}/results/results.json"
     with open(results_file, 'r') as f:
-        results = json.loads(f)
+        results = json.load(f)
         resolved_ids = set(results.get('resolved', []))
     
     # Create a DataFrame with results
     df_system = pd.DataFrame({
         'id': df_data['id'],
         'resolved': [1 if id in resolved_ids else 0 for id in df_data['id']],
-        'output': [preds.get(id, 'No patch generated') for id in df_data['id']],
     })
+    
+    # Add outputs with status and patch
+    outputs = []
+    for id in df_data['id']:
+        patch = preds.get(id, None)
+        if patch is None:
+            status = 'Not attempted'
+            patch_text = 'No patch generated'
+        else:
+            status = '✅ Success' if id in resolved_ids else '❌ Failed'
+            patch_text = patch
+        
+        outputs.append({
+            'status': status,
+            'patch': patch_text,
+        })
+    
+    df_system['output'] = outputs
+    df_system['data'] = df_data['problem_statement']
     
     # Upload the system results
     viz_project.upload_system(
