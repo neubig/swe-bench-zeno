@@ -19,7 +19,8 @@ from swe_bench.utilities import get_all_entries
     callback=lambda _ctx, _param, value: Split.from_str(value),
 )
 @click.option("--zeno-api-key", type=str, envvar="ZENO_API_KEY")
-def main(split: Split, zeno_api_key: str | None) -> None:
+@click.option("--top-n", type=int, default=None, help="Only include top N systems")
+def main(split: Split, zeno_api_key: str | None, top_n: int | None) -> None:
     """
     Convert the current leaderboard entries to a Zeno project.
     """
@@ -57,8 +58,23 @@ def main(split: Split, zeno_api_key: str | None) -> None:
         data_column="problem_statement",
     )
 
-    # Get all entries for the split.
+    # Get entries for the split
     entries = get_all_entries(split)
+    
+    # Sort by resolve rate and take top N if specified
+    if top_n is not None:
+        # Get resolve rates for sorting
+        resolve_rates = {}
+        for entry in entries:
+            try:
+                system = Evaluation.from_github(split, entry)
+                resolve_rates[entry] = len(system.results.resolved) / len(system.predictions)
+            except ValueError as e:
+                print(f"Skipping {entry} during sorting: {e}")
+                continue
+        
+        # Sort and take top N
+        entries = sorted(resolve_rates.keys(), key=lambda e: resolve_rates[e], reverse=True)[:top_n]
 
     for entry in entries:
         print(f"Processing system {entry}...")
