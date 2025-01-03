@@ -53,7 +53,10 @@ def main(split: Split, zeno_api_key: str | None, top_n: int | None) -> None:
     # Build and upload the dataset.
     dataset = Dataset.from_split(split)
     viz_project.upload_dataset(
-        pd.DataFrame([instance.model_dump() for instance in dataset.instances]),
+        pd.DataFrame([{
+            'instance_id': instance.instance_id,
+            'problem_statement': instance.problem_statement,
+        } for instance in dataset.instances]),
         id_column="instance_id",
         data_column="problem_statement",
     )
@@ -91,9 +94,9 @@ def main(split: Split, zeno_api_key: str | None, top_n: int | None) -> None:
                     "resolved": system.results.is_resolved(prediction.instance_id),
                     "output": {
                         "status": "✅ Success" if system.results.is_resolved(prediction.instance_id)
-                                else "❌ Failed" if prediction.model_patch
+                                else "❌ Failed" if prediction.patch
                                 else "Not attempted",
-                        "patch": prediction.model_patch or "No patch generated",
+                        "patch": prediction.patch or "No patch generated",
                     }
                 }
                 for prediction in system.predictions
