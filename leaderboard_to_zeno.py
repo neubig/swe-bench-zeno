@@ -31,7 +31,7 @@ def main(split: Split, zeno_api_key: str | None, top_n: int | None) -> None:
     # Create a new project.
     current_time = datetime.now()
     viz_project = viz_client.create_project(
-        name=f"SWE-bench Leaderboard ({current_time})",
+        name="SWE-bench Leaderboard",
         view={
             "data": {"type": "markdown"},
             "label": {"type": "text"},
@@ -56,6 +56,8 @@ def main(split: Split, zeno_api_key: str | None, top_n: int | None) -> None:
         pd.DataFrame([{
             'instance_id': instance.instance_id,
             'problem_statement': instance.problem_statement,
+            'repo': instance.repo,
+            'base_commit': instance.base_commit,
         } for instance in dataset.instances]),
         id_column="instance_id",
         data_column="problem_statement",
