@@ -3,3 +3,5 @@
 .venv
 .mypy_cache
 poetry.lock
+# Performance analysis data
+data/
