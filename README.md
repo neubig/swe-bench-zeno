@@ -113,6 +113,63 @@ For detailed analysis and recommendations, see [PERFORMANCE_ANALYSIS.md](PERFORM
    - Create documentation coverage checks
    - Build control flow comparison tools
 
+## Future Feature Analysis
+
+The following feature sets have been identified as promising areas for further investigation:
+
+### Implemented Features
+1. **Basic Metrics**
+   - Problem description length
+   - Patch size and file modifications
+   - Problem-patch semantic similarity
+
+2. **Code Structure**
+   - Function and class metrics
+   - Control flow patterns
+   - Variable and import analysis
+   - Documentation coverage
+   - Complexity scoring
+
+### Planned Features
+1. **Type System Analysis**
+   - Type annotation changes
+   - Type complexity (generics, unions)
+   - Type inference requirements
+   - Type safety impact
+
+2. **Error Handling Coverage**
+   - Exception pattern changes
+   - Error case coverage
+   - Exception hierarchy analysis
+   - Error handling complexity
+
+3. **Dependency Graph Analysis**
+   - Function call graph changes
+   - Module dependency patterns
+   - Circular dependency detection
+   - Import hierarchy analysis
+
+4. **Natural Language Alignment**
+   - Code identifier semantic analysis
+   - Variable naming consistency
+   - Function name alignment
+   - Documentation-code semantic gap
+
+5. **Context Window Requirements**
+   - Required context size
+   - Cross-file reference patterns
+   - Scope depth analysis
+   - Context switching complexity
+
+### Other Considered Features
+- API Usage Patterns
+- Test Context Analysis
+- Code Pattern Transitions
+- Repository-Specific Patterns
+- Code Style Transitions
+
+These features were considered but deprioritized due to measurement challenges or lower expected impact on understanding performance gaps.
+
 ## Requirements
 - Python 3.8+
 - pandas

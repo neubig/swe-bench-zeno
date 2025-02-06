@@ -9,6 +9,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans
 
 from code_structure import extract_patch_features as extract_code_features
+from advanced_features import extract_advanced_features
 
 def extract_patch_features(patch):
     if not patch:
@@ -26,11 +27,21 @@ def extract_patch_features(patch):
     # Get detailed code structure metrics
     code_metrics = extract_code_features(patch)
     
+    # Get advanced features
+    advanced_metrics = extract_advanced_features(patch)
+    
+    # Flatten advanced metrics
+    flattened_metrics = {}
+    for category, metrics in advanced_metrics.items():
+        for metric, value in metrics.items():
+            flattened_metrics[f"{category}_{metric}"] = value
+    
     return {
         'patch_size': patch_size,
         'files_modified': files_modified,
         'has_patch': True,
-        **code_metrics
+        **code_metrics,
+        **flattened_metrics
     }
 
 def extract_problem_features(problem_statement, repo):
