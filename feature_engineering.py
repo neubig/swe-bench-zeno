@@ -8,6 +8,8 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans
 
+from code_structure import extract_patch_features as extract_code_features
+
 def extract_patch_features(patch):
     if not patch:
         return {
@@ -16,17 +18,19 @@ def extract_patch_features(patch):
             'has_patch': False
         }
     
-    # Count lines changed
+    # Get basic patch metrics
     lines = patch.split('\n')
     patch_size = sum(1 for line in lines if line.startswith('+') or line.startswith('-'))
-    
-    # Count files modified (look for diff headers)
     files_modified = sum(1 for line in lines if line.startswith('diff --git'))
+    
+    # Get detailed code structure metrics
+    code_metrics = extract_code_features(patch)
     
     return {
         'patch_size': patch_size,
         'files_modified': files_modified,
-        'has_patch': True
+        'has_patch': True,
+        **code_metrics
     }
 
 def extract_problem_features(problem_statement, repo):
