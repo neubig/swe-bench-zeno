@@ -19,13 +19,17 @@ Scripts for analyzing the SWE-bench dataset with [Zeno](https://zenoml.com) and 
 Our analysis of OpenHands' performance on SWE-bench reveals several key patterns:
 
 ### Most Important Features
-1. Problem description length (20.9%)
-2. Patch size (18.4%)
-3. Problem-patch semantic similarity (17.9%)
-4. Number of files modified (10.7%)
-5. Cluster-based features (32.1%)
+1. Problem description length (11.7%)
+2. Number of imports after changes (9.1%)
+3. Problem-patch semantic similarity (8.6%)
+4. Patch size (7.1%)
+5. Total lines changed (7.0%)
+6. Variables after changes (6.6%)
+7. Comments after changes (5.8%)
+8. Other code structure features (44.1%)
 
 ### Key Insights
+
 1. **Semantic Understanding**:
    - High semantic similarity doesn't guarantee success
    - Some problem clusters have up to 72.7% failure rate
@@ -36,10 +40,29 @@ Our analysis of OpenHands' performance on SWE-bench reveals several key patterns
    - Difficulty with larger patches (136 vs 69 lines)
    - Multi-file changes are problematic (3.6 vs 2.8 files)
 
-3. **Quality Signals**:
+3. **Code Structure Patterns**:
+   - Function Changes:
+     * Failed cases show larger increases in parameters (+0.36 vs +0.13)
+     * Failed patches have much larger function length increases (+5.96 vs +1.86)
+     * Tends to fail when removing return statements (-2.0 vs +0.48)
+   - Control Flow:
+     * Struggles when removing control statements (-6.2 vs +1.38)
+     * Better performance when preserving existing flow
+   - Documentation:
+     * Success correlates with adding comments (+4.57 vs +0.09)
+     * Documentation changes signal understanding
+
+4. **Complexity Patterns**:
+   - Negative correlation between complexity changes and failures (-0.105)
+   - Successful changes: moderate complexity increase (+26.26)
+   - Failed changes: large complexity decrease (-106.32)
+   - Similar maximum complexity in both cases (~400-450)
+
+5. **Quality Signals**:
    - High variance in semantic similarity for problematic cases
    - Some failed cases show negative problem-patch similarity
    - Clear cluster-based patterns that could predict failures
+   - Documentation changes as a quality indicator
 
 For detailed analysis and recommendations, see [PERFORMANCE_ANALYSIS.md](PERFORMANCE_ANALYSIS.md).
 
@@ -63,6 +86,32 @@ For detailed analysis and recommendations, see [PERFORMANCE_ANALYSIS.md](PERFORM
    python feature_engineering.py
    python analyze_performance.py
    ```
+
+## Recommendations for Improvement
+
+1. **Prompting Strategy**:
+   - Include explicit requests for documentation updates
+   - Guide towards incremental function changes
+   - Encourage preserving existing control flow patterns
+   - Request explanations for complexity changes
+
+2. **Quality Checks**:
+   - Monitor semantic similarity between problem and patch
+   - Track complexity changes during generation
+   - Validate documentation coverage
+   - Check for control flow preservation
+
+3. **Model Enhancements**:
+   - Fine-tune on successful code structure patterns
+   - Add code structure awareness to the model
+   - Improve handling of multi-file changes
+   - Better modeling of function-level changes
+
+4. **Tooling Support**:
+   - Add automated code structure validation
+   - Implement complexity change monitoring
+   - Create documentation coverage checks
+   - Build control flow comparison tools
 
 ## Requirements
 - Python 3.8+
