@@ -11,10 +11,11 @@ This analysis examines the performance gaps between OpenHands and other top-perf
 ## Key Findings
 
 ### Most Important Features
-1. Problem description length (33.5% importance)
-2. Patch size (28.0% importance)
-3. Number of files modified (17.5% importance)
-4. Repository-specific factors (remaining ~21%)
+1. Problem description length (20.9% importance)
+2. Patch size (18.4% importance)
+3. Problem-patch semantic similarity (17.9% importance)
+4. Number of files modified (10.7% importance)
+5. Cluster-based features (32.1% combined importance)
 
 ### Performance Gap Characteristics
 Problems where OpenHands struggles tend to have:
@@ -22,9 +23,25 @@ Problems where OpenHands struggles tend to have:
 - Larger patches (mean: 136 lines vs 69 lines)
 - More files modified (mean: 3.6 files vs 2.8 files)
 
+### Semantic Patterns
+1. Problem Statement Clusters:
+   - Cluster 3 (11 cases): 72.7% performance gap rate
+   - Cluster 1 (14 cases): 71.4% performance gap rate
+   - Other clusters show lower gap rates (53-62%)
+
+2. Patch Clusters:
+   - Cluster 1 (14 cases): 85.7% performance gap rate
+   - Cluster 3 (5 cases): 80.0% performance gap rate
+   - Other clusters show lower gap rates (50-75%)
+
+3. Problem-Patch Similarity:
+   - Cases with performance gaps show slightly higher semantic similarity (mean: 0.590 vs 0.551)
+   - Higher variance in similarity for problematic cases (std: 0.181 vs 0.103)
+   - Some problematic cases show negative similarity, indicating potential misalignment
+
 ### Repository Impact
 Some repositories appear more challenging for OpenHands:
-- sympy
+- sympy (2.0% importance)
 - django
 - xarray
 - astropy
@@ -32,10 +49,20 @@ Some repositories appear more challenging for OpenHands:
 
 ## Recommendations
 
-1. Enhance the model's ability to process and understand longer problem descriptions
-2. Improve coordination capabilities for multi-file changes
-3. Focus on better handling of larger code changes
-4. Consider specialized training or prompting for scientific computing and web framework codebases
+1. Semantic Understanding:
+   - Enhance the model's ability to process and understand longer problem descriptions
+   - Focus on cases where problem-patch semantic similarity is high but the solution fails
+   - Investigate patterns in problematic clusters to identify common failure modes
+
+2. Technical Capabilities:
+   - Improve coordination capabilities for multi-file changes
+   - Focus on better handling of larger code changes
+   - Consider specialized training or prompting for scientific computing and web framework codebases
+
+3. Quality Assurance:
+   - Implement semantic similarity checks between problems and generated patches
+   - Use cluster analysis to identify high-risk cases that may need additional verification
+   - Consider different prompting strategies for different problem clusters
 
 ## Setup
 
