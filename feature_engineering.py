@@ -4,6 +4,9 @@ Extract features from SWE-bench data.
 import json
 from pathlib import Path
 import pandas as pd
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from sklearn.cluster import KMeans
 
 def extract_patch_features(patch):
     if not patch:
@@ -32,6 +35,15 @@ def extract_problem_features(problem_statement, repo):
         'repo_name': repo.split('/')[-1],
         'org_name': repo.split('/')[-2]
     }
+
+def get_embeddings(texts, model):
+    """Get embeddings for a list of texts."""
+    return model.encode(texts, show_progress_bar=True)
+
+def cluster_embeddings(embeddings, n_clusters=5):
+    """Cluster embeddings using K-means."""
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    return kmeans.fit_predict(embeddings)
 
 def main():
     data_dir = Path("data")
@@ -70,17 +82,25 @@ def main():
     openhands_results = {p['instance_id']: p['resolved'] 
                         for p in openhands_data['predictions']}
     
-    # For each instance OpenHands attempted
+    # Load sentence transformer model
+    print("Loading sentence transformer model...")
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    
+    # Collect all problem statements and patches for embedding
+    problem_statements = []
+    patches = []
+    instance_ids = []
+    
     for pred in openhands_data['predictions']:
         instance_id = pred['instance_id']
         instance = instance_lookup[instance_id]
         
         # Check how top models did on this instance
         top_model_success = 0
-        for model in top_model_names:
-            if model == 'openhands/openhands-agent':
+        for model_name in top_model_names:
+            if model_name == 'openhands/openhands-agent':
                 continue
-            model_data = systems[model]
+            model_data = systems[model_name]
             instance_results = [p for p in model_data['predictions'] 
                               if p['instance_id'] == instance_id]
             if instance_results and instance_results[0]['resolved']:
@@ -95,6 +115,11 @@ def main():
                 instance['repo']
             )
             
+            # Add to lists for embedding
+            problem_statements.append(instance['problem_statement'])
+            patches.append(pred['patch'] if pred['patch'] else "")
+            instance_ids.append(instance_id)
+            
             rows.append({
                 'instance_id': instance_id,
                 **patch_features,
@@ -102,8 +127,30 @@ def main():
                 'top_model_success_rate': top_model_success / len(top_model_names)
             })
     
-    # Create and save features DataFrame
+    # Create embeddings and clusters
+    print("Creating embeddings for problem statements...")
+    problem_embeddings = get_embeddings(problem_statements, model)
+    print("Creating embeddings for patches...")
+    patch_embeddings = get_embeddings(patches, model)
+    
+    # Cluster embeddings
+    print("Clustering embeddings...")
+    problem_clusters = cluster_embeddings(problem_embeddings)
+    patch_clusters = cluster_embeddings(patch_embeddings)
+    
+    # Add cluster information to features
     features_df = pd.DataFrame(rows)
+    features_df['problem_cluster'] = problem_clusters
+    features_df['patch_cluster'] = patch_clusters
+    
+    # Add embedding similarity between problem and patch
+    similarities = np.array([
+        np.dot(p, q) / (np.linalg.norm(p) * np.linalg.norm(q))
+        for p, q in zip(problem_embeddings, patch_embeddings)
+    ])
+    features_df['problem_patch_similarity'] = similarities
+    
+    # Save features DataFrame
     features_df.to_csv(data_dir / "features.csv", index=False)
 
 if __name__ == "__main__":
