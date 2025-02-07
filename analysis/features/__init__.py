@@ -1,8 +1,10 @@
 from analysis.features.patch import Patch, Diff
-from analysis.code_structure import CodeMetrics
+from analysis.features.code_metrics import CodeMetrics
+from analysis.features.type_metrics import TypeMetrics
 
 __all__ = [
     'CodeMetrics',
+    'TypeMetrics',
     'Patch',
     'Diff'
 ]
