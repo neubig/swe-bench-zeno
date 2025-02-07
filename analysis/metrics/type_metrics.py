@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import ast
-from pydantic import BaseModel
 
-class TypeMetrics(BaseModel):
+from analysis.features.metrics import Metrics
+
+class TypeMetrics(Metrics):
     number_of_type_annotations: int = 0
     number_of_generic_types: int = 0
     number_of_union_types: int = 0
@@ -11,29 +12,6 @@ class TypeMetrics(BaseModel):
     number_of_callable_types: int = 0
     number_of_custom_types: int = 0
 
-    def __add__(self, other: TypeMetrics) -> TypeMetrics:
-        return TypeMetrics(
-            number_of_type_annotations=self.number_of_type_annotations + other.number_of_type_annotations,
-            number_of_generic_types=self.number_of_generic_types + other.number_of_generic_types,
-            number_of_union_types=self.number_of_union_types + other.number_of_union_types,
-            number_of_optional_types=self.number_of_optional_types + other.number_of_optional_types,
-            number_of_callable_types=self.number_of_callable_types + other.number_of_callable_types,
-            number_of_custom_types=self.number_of_custom_types + other.number_of_custom_types,
-        )
-
-    def complexity(self) -> float:
-        """Type system complexity score.
-        
-        Weights chosen by OpenHands.
-        """
-        return (
-            self.number_of_type_annotations * 1.0 +
-            self.number_of_generic_types * 1.5 +
-            self.number_of_union_types * 2.0 +
-            self.number_of_optional_types * 1.2 +
-            self.number_of_callable_types * 1.8 +
-            self.number_of_custom_types * 1.3
-        )
     
 class TypeMetricsVisitor(ast.NodeVisitor):
     """AST visitor for extracting advanced code features."""

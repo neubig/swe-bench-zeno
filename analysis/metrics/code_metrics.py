@@ -6,9 +6,10 @@ from __future__ import annotations
 import ast
 import tokenize
 from io import StringIO
-from pydantic import BaseModel
 
-class CodeMetrics(BaseModel):
+from analysis.features.metrics import Metrics
+
+class CodeMetrics(Metrics):
     number_of_functions: int = 0
     number_of_classes: int = 0
     number_of_methods: int = 0
@@ -24,25 +25,6 @@ class CodeMetrics(BaseModel):
     number_of_returns: int = 0
     number_of_imports: int = 0
     number_of_decorators: int = 0
-
-    def __add__(self, other: CodeMetrics) -> CodeMetrics:
-        return CodeMetrics(
-            number_of_functions=self.number_of_functions + other.number_of_functions,
-            number_of_classes=self.number_of_classes + other.number_of_classes,
-            number_of_methods=self.number_of_methods + other.number_of_methods,
-            max_nested_depth=max(self.max_nested_depth, other.max_nested_depth),
-            number_of_lines=self.number_of_lines + other.number_of_lines,
-            number_of_comment_lines=self.number_of_comment_lines + other.number_of_comment_lines,
-            number_of_docstring_lines=self.number_of_docstring_lines + other.number_of_docstring_lines,
-            number_of_control_statements=self.number_of_control_statements + other.number_of_control_statements,
-            number_of_variables=self.number_of_variables + other.number_of_variables,
-            average_function_length=(self.average_function_length + other.average_function_length) / 2,
-            max_function_length=max(self.max_function_length, other.max_function_length),
-            number_of_function_parameters=self.number_of_function_parameters + other.number_of_function_parameters,
-            number_of_returns=self.number_of_returns + other.number_of_returns,
-            number_of_imports=self.number_of_imports + other.number_of_imports,
-            number_of_decorators=self.number_of_decorators + other.number_of_decorators
-        )
 
 class StructureVisitor(ast.NodeVisitor):
     """AST visitor to collect code structure metrics."""

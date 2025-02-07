@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import ast
-from pydantic import BaseModel
 import networkx as nx # type: ignore
 
-class DependencyMetrics(BaseModel):
+from analysis.features.metrics import Metrics
+
+class DependencyMetrics(Metrics):
     number_of_function_calls: int = 0
     number_of_unique_calls: int = 0
     max_call_depth: int = 0
@@ -12,32 +13,6 @@ class DependencyMetrics(BaseModel):
     import_depth: int = 0
     number_of_internal_dependencies: int = 0
     number_of_external_dependencies: int = 0
-
-    def complexity(self) -> float:
-        """Dependency complexity score.
-        
-        Weights chosen by OpenHands.
-        """
-        return (
-            self.number_of_function_calls * 0.5 +
-            self.number_of_unique_calls * 1.0 +
-            self.max_call_depth * 2.0 +
-            self.number_of_circular_dependencices * 3.0 +
-            self.import_depth * 1.5 +
-            self.number_of_internal_dependencies * 1.0 +
-            self.number_of_external_dependencies * 1.2
-        )
-    
-    def __add__(self, other: DependencyMetrics) -> DependencyMetrics:
-        return DependencyMetrics(
-            number_of_function_calls=self.number_of_function_calls + other.number_of_function_calls,
-            number_of_unique_calls=self.number_of_unique_calls + other.number_of_unique_calls,
-            max_call_depth=max(self.max_call_depth, other.max_call_depth),
-            number_of_circular_dependencices=self.number_of_circular_dependencices + other.number_of_circular_dependencices,
-            import_depth=self.import_depth + other.import_depth,
-            number_of_internal_dependencies=self.number_of_internal_dependencies + other.number_of_internal_dependencies,
-            number_of_external_dependencies=self.number_of_external_dependencies + other.number_of_external_dependencies
-        )
     
     def add_call_graph(self, call_graph: nx.DiGraph) -> None:
         """Add call graph to metrics.
