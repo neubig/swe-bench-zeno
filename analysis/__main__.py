@@ -38,31 +38,11 @@ def download(split: Split) -> None:
 
 @cli.command()
 def compute_features() -> None:
-    """Test loading a data file."""
+    """Compute features for the downloaded data."""
     with open("data.json") as f:
         data = Data.model_validate_json(f.read())
 
-    # Convert metrics to pandas dataframe
-    rows = []
-    for instance in data.dataset.instances:
-        # Test computing metrics
-        patch = Patch.from_str(instance.patch)
-        metrics = apply_metrics(
-            patch,
-            {
-                "code": CodeMetrics,
-                "type": TypeMetrics,
-                "error": ErrorMetrics,
-                "dependency": DependencyMetrics,
-            },
-        )
-
-        row = pd.DataFrame([{**metrics, "instance_id": instance.instance_id}])
-        rows.append(row)
-
-    df = pd.concat(rows)
-
-    # Save to CSV
+    df = compute_features(data.dataset.instances)
     df.to_csv("features.csv", index=False)
 
 
