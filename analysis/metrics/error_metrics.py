@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 
-from analysis.features.metrics import Metrics
+from analysis.metrics.metrics import Metrics
 
 class ErrorMetrics(Metrics):
     number_of_try_blocks: int = 0
