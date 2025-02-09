@@ -1,17 +1,8 @@
 from pathlib import Path
 import click
-import pandas as pd
 
 from swe_bench.models import Split
 from analysis.models.data import Data
-from analysis.metrics import (
-    apply_metrics,
-    CodeMetrics,
-    TypeMetrics,
-    ErrorMetrics,
-    DependencyMetrics,
-)
-from analysis.models.patch import Patch
 
 
 @click.group()
