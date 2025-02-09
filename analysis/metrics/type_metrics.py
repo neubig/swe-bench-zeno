@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 
-from analysis.features.metrics import Metrics
+from analysis.metrics.metrics import Metrics
 
 class TypeMetrics(Metrics):
     number_of_type_annotations: int = 0

@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 import networkx as nx # type: ignore
 
-from analysis.features.metrics import Metrics
+from analysis.metrics.metrics import Metrics
 
 class DependencyMetrics(Metrics):
     number_of_function_calls: int = 0
