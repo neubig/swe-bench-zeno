@@ -1,13 +1,15 @@
-from analysis.features.metrics import Metrics
-from analysis.features.code_metrics import CodeMetrics
-from analysis.features.type_metrics import TypeMetrics
-from analysis.features.error_metrics import ErrorMetrics
-from analysis.features.dependency_metrics import DependencyMetrics
+from analysis.metrics.metrics import Metrics
+from analysis.metrics.code_metrics import CodeMetrics
+from analysis.metrics.type_metrics import TypeMetrics
+from analysis.metrics.error_metrics import ErrorMetrics
+from analysis.metrics.dependency_metrics import DependencyMetrics
+from analysis.metrics.apply_metrics import apply_metrics
 
 __all__ = [
     'CodeMetrics',
     'TypeMetrics',
     'ErrorMetrics',
     'DependencyMetrics',
-    'Metrics'
+    'Metrics',
+    'apply_metrics',
 ]

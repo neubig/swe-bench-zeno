@@ -67,3 +67,17 @@ class Metrics(BaseModel):
                 raise TypeError(f"Cannot take absolute value of field '{field_name}': {str(e)}")
         
         return type(self)(**new_values)
+
+    def to_dict(self, prefix: str | None = None, suffix: str | None = None) -> dict[str, int | float]:
+        """Convert model to dictionary."""
+        def update_field_name(field_name: str, separator: str = "/") -> str:
+            if prefix is not None:
+                field_name = f"{prefix}{separator}{field_name}"
+            if suffix is not None:
+                field_name = f"{field_name}{separator}{suffix}"
+            return field_name
+        
+        return {
+            update_field_name(field_name): getattr(self, field_name)
+            for field_name in self.model_fields
+        }

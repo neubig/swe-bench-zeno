@@ -7,7 +7,7 @@ import ast
 import tokenize
 from io import StringIO
 
-from analysis.features.metrics import Metrics
+from analysis.metrics.metrics import Metrics
 
 class CodeMetrics(Metrics):
     number_of_functions: int = 0
