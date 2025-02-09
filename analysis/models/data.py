@@ -3,11 +3,9 @@ Download and store SWE-bench data locally.
 """
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from swe_bench.models import Split, Dataset, Evaluation
 from swe_bench.utilities import get_all_entries
-
+from difflib import get_close_matches
 from pydantic import BaseModel
 
 class Data(BaseModel):
@@ -29,3 +27,13 @@ class Data(BaseModel):
                 continue
         
         return Data(dataset=dataset, systems=systems)
+
+    def closest_system(self, system_name: str) -> str:
+        """
+        Get the system identifier closest to the provided name.
+        """
+        matches = get_close_matches(system_name, self.systems.keys(), n=1)
+        if not matches:
+            raise ValueError(f"No system found for {system_name}")
+        
+        return matches[0]
