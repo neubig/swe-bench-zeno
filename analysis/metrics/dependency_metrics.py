@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 import networkx as nx # type: ignore
 
-from analysis.metrics.metrics import Metrics
+from analysis.metrics.metrics import Metrics, parse_code_fragment
 
 class DependencyMetrics(Metrics):
     number_of_function_calls: int = 0
@@ -20,12 +20,15 @@ class DependencyMetrics(Metrics):
         The call graph is needed to determine the number of unique calls, the maximum call depth, and the number of circular dependencies
         """
         self.number_of_unique_calls = len(call_graph.nodes())
-        self.max_call_depth = max(
-            len(nx.shortest_path(call_graph, source=source, target=target))
-            for source in call_graph.nodes()
-            for target in call_graph.nodes()
-            if nx.has_path(call_graph, source, target)
-        ) - 1
+        if self.number_of_unique_calls == 0:
+            self.max_call_depth = 0
+        else:
+            self.max_call_depth = max(
+                len(nx.shortest_path(call_graph, source=source, target=target))
+                for source in call_graph.nodes()
+                for target in call_graph.nodes()
+                if nx.has_path(call_graph, source, target)
+            ) - 1
         try:
             self.number_of_circular_dependencices = len(list(nx.simple_cycles(call_graph)))
         except nx.NetworkXNoCycle:
@@ -63,9 +66,9 @@ class DependencyMetricsVisitor(ast.NodeVisitor):
 def extract_dependency_metrics(code: str) -> DependencyMetrics:
     """Extract advanced features from Python code."""
     try:
-        tree = ast.parse(code)
-    except SyntaxError:
-        DependencyMetrics()
+        tree = parse_code_fragment(code)
+    except (SyntaxError, ValueError):
+        return DependencyMetrics()
     
     visitor = DependencyMetricsVisitor()
     visitor.visit(tree)

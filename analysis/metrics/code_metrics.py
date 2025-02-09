@@ -7,7 +7,7 @@ import ast
 import tokenize
 from io import StringIO
 
-from analysis.metrics.metrics import Metrics
+from analysis.metrics.metrics import Metrics, parse_code_fragment
 
 class CodeMetrics(Metrics):
     number_of_functions: int = 0
@@ -96,37 +96,60 @@ class StructureVisitor(ast.NodeVisitor):
             self.current_depth -= 1
 
 def count_comments_and_docstrings(code: str) -> tuple[int, int]:
-    """Count comment and docstring lines in code."""
+    """
+    Count comments and docstrings in code while being tolerant of indentation errors.
+    Returns (comment_lines, docstring_lines)
+    """
+    # First normalize any CRLF to LF
+    code = code.replace('\r\n', '\n')
+    
+    # Add a dummy line at the start to help with indentation
+    code = "if True:\n" + code
+    
     comment_lines = 0
     docstring_lines = 0
     
-    # Count comments using tokenize
     try:
-        tokens = tokenize.generate_tokens(StringIO(code).readline)
-        for token in tokens:
+        # Generate tokens from the code
+        tokens = list(tokenize.generate_tokens(StringIO(code).readline))
+        
+        i = 0
+        while i < len(tokens):
+            token = tokens[i]
+            
+            # Handle comments
             if token.type == tokenize.COMMENT:
                 comment_lines += 1
-    except tokenize.TokenError:
-        pass
-    
-    # Count docstrings using AST
-    try:
-        tree = ast.parse(code)
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.Module)):
-                if ast.get_docstring(node):
-                    docstring = ast.get_docstring(node)
-                    docstring_lines += len(docstring.split('\n'))
-    except SyntaxError:
-        pass
+            
+            # Handle string literals that might be docstrings
+            elif token.type == tokenize.STRING:
+                # Check if this string is a docstring
+                # It should be the first statement in a module, class, or function
+                if i > 0:
+                    prev_token = tokens[i-1]
+                    # Check if previous token indicates this could be a docstring
+                    if prev_token.type in (tokenize.INDENT, tokenize.NEWLINE):
+                        # Count the number of lines in this string
+                        docstring_lines += len(token.string.splitlines())
+            
+            i += 1
+            
+    except (tokenize.TokenError, IndentationError):
+        # If tokenization fails, try line by line
+        for line in code.splitlines():
+            line = line.strip()
+            if line.startswith('#'):
+                comment_lines += 1
+            elif line.startswith('"""') or line.startswith("'''"):
+                docstring_lines += 1
     
     return comment_lines, docstring_lines
 
 def extract_file_metrics(code: str) -> CodeMetrics:
     """Extract metrics from a Python file."""
     try:
-        tree = ast.parse(code)
-    except SyntaxError:
+        tree = parse_code_fragment(code)
+    except (SyntaxError, ValueError):
         return CodeMetrics()
     
     visitor = StructureVisitor()
@@ -138,7 +161,7 @@ def extract_file_metrics(code: str) -> CodeMetrics:
     metrics.number_of_lines = len(code.split('\n'))
     
     if visitor.function_lines:
-        metrics.avg_function_length = sum(visitor.function_lines) / len(visitor.function_lines)
+        metrics.average_function_length = sum(visitor.function_lines) / len(visitor.function_lines)
         metrics.max_function_length = max(visitor.function_lines)
     
     comment_lines, docstring_lines = count_comments_and_docstrings(code)

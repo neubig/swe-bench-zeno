@@ -52,4 +52,4 @@ class Patch(BaseModel):
         except Exception:
             pass
         
-        return files
+        return Patch(files=files)

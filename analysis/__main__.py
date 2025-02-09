@@ -1,5 +1,6 @@
 from pathlib import Path
 import click
+import pandas as pd
 
 from swe_bench.models import Split
 from analysis.models.data import Data
@@ -29,7 +30,10 @@ def test(filepath: click.Path) -> None:
     """Test loading a data file."""
     with open(filepath) as f:
         data = Data.model_validate_json(f.read())
-    
+
+    rows = []
+
+    # Convert metrics to pandas dataframe
     for instance in data.dataset.instances:
         click.echo(f"Instance: {instance.instance_id}")
 
@@ -37,9 +41,14 @@ def test(filepath: click.Path) -> None:
         patch = Patch.from_str(instance.patch)
         metrics = apply_metrics(patch, {"code": CodeMetrics, "type": TypeMetrics, "error": ErrorMetrics, "dependency": DependencyMetrics})
 
-        print(metrics)
-        
-        break
+        row = pd.DataFrame({**metrics, "instance_id": instance.instance_id}, index=[0])
+        rows.append(row)
+    
+    df = pd.concat(rows)
+
+    col_sums = df.sum()
+    nonzero_cols = col_sums[col_sums > 0].index.tolist()
+    print(nonzero_cols)
 
 if __name__ == "__main__":
     cli()

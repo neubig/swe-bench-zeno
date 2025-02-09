@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 
-from analysis.metrics.metrics import Metrics
+from analysis.metrics.metrics import Metrics, parse_code_fragment
 
 class ErrorMetrics(Metrics):
     number_of_try_blocks: int = 0
@@ -56,8 +56,8 @@ class ErrorMetricsVisitor(ast.NodeVisitor):
 def extract_error_metrics(code: str) -> ErrorMetrics:
     """Extract advanced features from Python code."""
     try:
-        tree = ast.parse(code)
-    except SyntaxError:
+        tree = parse_code_fragment(code)
+    except (SyntaxError, ValueError):
         return ErrorMetrics()
     
     visitor = ErrorMetricsVisitor()

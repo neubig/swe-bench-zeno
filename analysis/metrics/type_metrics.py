@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 
-from analysis.metrics.metrics import Metrics
+from analysis.metrics.metrics import Metrics, parse_code_fragment
 
 class TypeMetrics(Metrics):
     number_of_type_annotations: int = 0
@@ -51,8 +51,8 @@ class TypeMetricsVisitor(ast.NodeVisitor):
 def extract_type_metrics(code: str) -> TypeMetrics:
     """Extract type metrics from Python code."""
     try:
-        tree = ast.parse(code)
-    except SyntaxError:
+        tree = parse_code_fragment(code)
+    except (SyntaxError, ValueError):
         return TypeMetrics()
     
     visitor = TypeMetricsVisitor()
