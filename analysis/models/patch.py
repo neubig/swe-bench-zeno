@@ -21,7 +21,10 @@ class Patch(BaseModel):
 
     @staticmethod
     def from_str(patch: str) -> Patch:
-        """Parse a git patch into a Patch object."""
+        """Parse a git patch into a Patch object.
+        
+        This doesn't work particularly well for small or disjoint patches, since each diff is missing lots of context.
+        """
         files = {}
         current_file = None
         current_before = []
@@ -63,19 +66,18 @@ class Patch(BaseModel):
 
     @staticmethod
     def from_instance(instance: Instance) -> Patch:
-        """Parse a Patch from an Instance."""
+        """Parse a Patch from an Instance.
+        
+        Requires downloading the original file from GitHub.
+        """
         files: dict[str, Diff] = {}
 
         for patch in unidiff.PatchSet.from_string(instance.patch):
             path = patch.path
-            print(f"  Grabbing {path} from {instance.repo}...")
-
             url = f"https://raw.githubusercontent.com/{instance.repo}/{instance.base_commit}/{path}"
             response = requests.get(url)
             response.raise_for_status()
-
-            print(f"  Applying patch to {path}...")
-
+            
             lines = response.text.splitlines(keepends=True)
 
             for hunk in patch:
@@ -94,6 +96,5 @@ class Patch(BaseModel):
 
             files[path] = Diff(before=response.text, after="".join(lines))
 
-        print(f"  ...done. {len(files)} files patched.")
         return Patch(patch=instance.patch, files=files)
 
