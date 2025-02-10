@@ -6,20 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
-import numpy as np
 
-def analyze_clusters(df, cluster_col, gap_col):
-    """Analyze the relationship between clusters and performance gaps."""
-    cluster_stats = pd.DataFrame()
-    
-    for cluster in df[cluster_col].unique():
-        cluster_data = df[df[cluster_col] == cluster]
-        gap_rate = cluster_data[gap_col].mean()
-        size = len(cluster_data)
-        cluster_stats.loc[cluster, 'size'] = size
-        cluster_stats.loc[cluster, 'gap_rate'] = gap_rate
-    
-    return cluster_stats.sort_values('gap_rate', ascending=False)
 
 def analyze_code_structure_changes(df: pd.DataFrame) -> pd.DataFrame:
     """Analyze how code structure changes correlate with performance gaps."""
@@ -59,31 +46,6 @@ def analyze_code_structure_changes(df: pd.DataFrame) -> pd.DataFrame:
     
     return pd.DataFrame(results).sort_values('Correlation', key=abs, ascending=False)
 
-def analyze_complexity_patterns(df: pd.DataFrame) -> dict:
-    """Analyze patterns in code complexity metrics."""
-    # Calculate complexity scores
-    df['complexity_before'] = (
-        df['max_nested_depth_before'] * 
-        df['total_control_statements_before'] * 
-        df['total_variables_before']
-    ) / (df['total_functions_before'] + 1)
-    
-    df['complexity_after'] = (
-        df['max_nested_depth_after'] * 
-        df['total_control_statements_after'] * 
-        df['total_variables_after']
-    ) / (df['total_functions_after'] + 1)
-    
-    df['complexity_change'] = df['complexity_after'] - df['complexity_before']
-    
-    return {
-        'complexity_correlation': df['complexity_change'].corr(df['performance_gap']),
-        'avg_complexity_success': df[df['performance_gap'] == 0]['complexity_change'].mean(),
-        'avg_complexity_fail': df[df['performance_gap'] == 1]['complexity_change'].mean(),
-        'max_complexity_success': df[df['performance_gap'] == 0]['complexity_after'].max(),
-        'max_complexity_fail': df[df['performance_gap'] == 1]['complexity_after'].max()
-    }
-
 def main():
     # Load features
     df = pd.DataFrame(pd.read_csv("data/features.csv"))
@@ -92,7 +54,6 @@ def main():
     df['performance_gap'] = (df['top_model_success_rate'] > 0.6).astype(int)
     
     # Prepare features
-    categorical_features = ['repo_name', 'org_name', 'problem_cluster', 'patch_cluster']
     numerical_features = [
         # Basic metrics
         'patch_size', 
@@ -135,8 +96,7 @@ def main():
     ]
     
     # One-hot encode categorical features
-    X = pd.get_dummies(df[categorical_features + numerical_features], 
-                      columns=categorical_features)
+    X = df
     y = df['performance_gap']
     
     # Split data
@@ -182,35 +142,6 @@ def main():
     structure_changes = analyze_code_structure_changes(df)
     print("\nTop 10 Most Predictive Code Changes:")
     print(structure_changes.head(10))
-    
-    # Analyze complexity patterns
-    print("\nCode Complexity Analysis:")
-    complexity_stats = analyze_complexity_patterns(df)
-    print(f"Complexity change correlation with failures: {complexity_stats['complexity_correlation']:.3f}")
-    print(f"Average complexity change (success): {complexity_stats['avg_complexity_success']:.2f}")
-    print(f"Average complexity change (failure): {complexity_stats['avg_complexity_fail']:.2f}")
-    print(f"Maximum complexity (success): {complexity_stats['max_complexity_success']:.2f}")
-    print(f"Maximum complexity (failure): {complexity_stats['max_complexity_fail']:.2f}")
-    
-    # Analyze clusters
-    print("\nProblem Statement Cluster Analysis:")
-    problem_cluster_stats = analyze_clusters(df, 'problem_cluster', 'performance_gap')
-    print(problem_cluster_stats)
-    
-    print("\nPatch Cluster Analysis:")
-    patch_cluster_stats = analyze_clusters(df, 'patch_cluster', 'performance_gap')
-    print(patch_cluster_stats)
-    
-    # Analyze problem-patch similarity
-    print("\nProblem-Patch Similarity Analysis:")
-    similarity_corr = df['problem_patch_similarity'].corr(df['performance_gap'])
-    print(f"Correlation with performance gap: {similarity_corr:.3f}")
-    
-    print("\nSimilarity Statistics for Cases with Performance Gap:")
-    print(df[df['performance_gap'] == 1]['problem_patch_similarity'].describe())
-    
-    print("\nSimilarity Statistics for Cases without Performance Gap:")
-    print(df[df['performance_gap'] == 0]['problem_patch_similarity'].describe())
 
 if __name__ == "__main__":
     main()

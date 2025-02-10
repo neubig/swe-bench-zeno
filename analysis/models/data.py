@@ -32,7 +32,7 @@ class Data(BaseModel):
         """
         Get the system identifier closest to the provided name.
         """
-        matches = get_close_matches(system_name, self.systems.keys(), n=1)
+        matches = get_close_matches(system_name, self.systems.keys(), n=1, cutoff=0.0)
         if not matches:
             raise ValueError(f"No system found for {system_name}")
         

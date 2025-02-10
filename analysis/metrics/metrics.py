@@ -134,4 +134,5 @@ def parse_code_fragment(code: str) -> ast.AST:
     if valid_nodes:
         return ast.Module(body=valid_nodes, type_ignores=[])
     
+    print("Failed to parse code fragment")
     raise ValueError()
