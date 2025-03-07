@@ -1,5 +1,7 @@
 # swe-bench-zeno
 
+**This repo has moved [here](https://github.com/All-Hands-AI/agent-analysis)**
+
 Scripts for analyzing the SWE-bench dataset with [Zeno](https://zenoml.com) and understanding model performance patterns.
 
 ## Core Analysis Scripts
